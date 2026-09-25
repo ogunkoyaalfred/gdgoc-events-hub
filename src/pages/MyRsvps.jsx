@@ -1,67 +1,108 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCalendarXmark, faClock, faLocationDot } from '@fortawesome/free-solid-svg-icons'
-import { useEvents } from '../context/EventsContext'
-import { categoryThemes, fallbackCategoryTheme } from '../utils/categoryTheme'
-import { CardSkeletons, ErrorState } from '../components/States'
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCalendarXmark,
+  faClock,
+  faLocationDot,
+} from "@fortawesome/free-solid-svg-icons";
+import { useEvents } from "../context/EventsContext";
+import { categoryThemes, fallbackCategoryTheme } from "../utils/categoryTheme";
+import { TicketSkeletons, ErrorState } from "../components/States";
 
-const fmt = (options) => new Intl.DateTimeFormat('en-NG', { timeZone: 'Africa/Lagos', ...options })
-const longDate = fmt({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-const timeFormat = fmt({ hour: 'numeric', minute: '2-digit', hour12: true })
+const fmt = (options) =>
+  new Intl.DateTimeFormat("en-NG", { timeZone: "Africa/Lagos", ...options });
+const longDate = fmt({
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+const timeFormat = fmt({ hour: "numeric", minute: "2-digit", hour12: true });
 
 // The colour the little "torn" notches sit against. Matches the page
 // background (set in index.css) so they read as cut-out circles, not dots.
-const PAGE_BG = '#FAFAFA'
+const PAGE_BG = "#FAFAFA";
 
 export default function MyRsvps() {
-  const { events, status, load, rsvps, cancelRsvp } = useEvents()
-  const [confirmingId, setConfirmingId] = useState(null)
+  const { events, status, load, rsvps, cancelRsvp } = useEvents();
+  const [confirmingId, setConfirmingId] = useState(null);
 
-  if (status === 'loading') {
+  // re-fetch (and re-show the loading skeleton) every time this page is visited
+  useEffect(() => load(), [load]);
+
+  if (status === "loading") {
     return (
-      <main id="main" tabIndex={-1} className="outline-none mx-auto max-w-3xl px-4 py-10">
-        <CardSkeletons count={2} />
+      <main
+        id="main"
+        tabIndex={-1}
+        className="outline-none mx-auto max-w-3xl px-4 py-10"
+      >
+        <TicketSkeletons count={2} />
       </main>
-    )
+    );
   }
 
-  if (status === 'error') {
+  if (status === "error") {
     return (
-      <main id="main" tabIndex={-1} className="outline-none mx-auto max-w-3xl px-4 py-10">
+      <main
+        id="main"
+        tabIndex={-1}
+        className="outline-none mx-auto max-w-3xl px-4 py-10"
+      >
         <ErrorState onRetry={load} />
       </main>
-    )
+    );
   }
 
   const rows = rsvps
     .map((rsvp) => ({ rsvp, event: events.find((e) => e.id === rsvp.eventId) }))
     .filter((row) => row.event)
-    .sort((a, b) => new Date(a.event.date) - new Date(b.event.date))
+    .sort((a, b) => new Date(a.event.date) - new Date(b.event.date));
 
   return (
-    <main id="main" tabIndex={-1} className="outline-none mx-auto max-w-3xl px-4 py-6 sm:py-10">
-      <h1 className="text-2xl mb-5 font-semibold tracking-tight text-zinc-900 sm:text-3xl">My RSVPs</h1>
+    <main
+      id="main"
+      tabIndex={-1}
+      className="outline-none mx-auto max-w-3xl px-4 py-6 sm:py-10"
+    >
+      <h1 className="text-2xl mb-5 font-semibold tracking-tight text-zinc-900 sm:text-3xl">
+        My RSVPs
+      </h1>
 
       {rows.length === 0 ? (
         <div className="grid justify-items-center gap-3 rounded-2xl border-2 border-dashed border-zinc-300 px-5 py-16 text-center">
-          <FontAwesomeIcon icon={faCalendarXmark} className="w-8 text-zinc-400" aria-hidden="true" />
+          <FontAwesomeIcon
+            icon={faCalendarXmark}
+            className="w-8 text-zinc-400"
+            aria-hidden="true"
+          />
           <h2 className="text-xl font-semibold">You haven't RSVPed yet</h2>
-          <p className="max-w-md text-zinc-600">When you save a seat at an event, it will show up here.</p>
-          <Link to="/" className="min-h-11 rounded-lg bg-zinc-900 px-5 py-2.5 font-semibold text-white">
+          <p className="max-w-md text-zinc-600">
+            When you save a seat at an event, it will show up here.
+          </p>
+          <Link
+            to="/"
+            className="min-h-11 rounded-lg bg-zinc-900 px-5 py-2.5 font-semibold text-white"
+          >
             Browse events
           </Link>
         </div>
       ) : (
         <ul className="flex flex-col gap-5">
           {rows.map(({ rsvp, event }) => {
-            const t = categoryThemes[event.category] ?? fallbackCategoryTheme
-            const date = new Date(event.date)
+            const t = categoryThemes[event.category] ?? fallbackCategoryTheme;
+            const date = new Date(event.date);
 
             return (
               <li
                 key={rsvp.id}
-                style={{ '--c50': t.c50, '--c100': t.c100, '--c800': t.c800, '--c900': t.c900 }}
+                style={{
+                  "--c50": t.c50,
+                  "--c100": t.c100,
+                  "--c800": t.c800,
+                  "--c900": t.c900,
+                }}
                 className="overflow-hidden rounded-2xl bg-white shadow-sm"
               >
                 {/* Boarding-pass body: the main info panel, then a torn stub on the right */}
@@ -71,17 +112,29 @@ export default function MyRsvps() {
                       {event.category}
                     </span>
                     <h2 className="text-base leading-snug font-semibold text-zinc-900 sm:text-lg">
-                      <Link to={`/events/${event.id}`} className="hover:underline">
+                      <Link
+                        to={`/events/${event.id}`}
+                        className="hover:underline"
+                      >
                         {event.title}
                       </Link>
                     </h2>
                     <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-600 sm:text-sm">
                       <span className="flex items-center gap-1.5">
-                        <FontAwesomeIcon icon={faClock} className="w-3 flex-none" aria-hidden="true" />
-                        {longDate.format(date)}, {timeFormat.format(date).toUpperCase()}
+                        <FontAwesomeIcon
+                          icon={faClock}
+                          className="w-3 flex-none"
+                          aria-hidden="true"
+                        />
+                        {longDate.format(date)},{" "}
+                        {timeFormat.format(date).toUpperCase()}
                       </span>
                       <span className="flex items-center gap-1.5">
-                        <FontAwesomeIcon icon={faLocationDot} className="w-3 flex-none" aria-hidden="true" />
+                        <FontAwesomeIcon
+                          icon={faLocationDot}
+                          className="w-3 flex-none"
+                          aria-hidden="true"
+                        />
                         {event.venue}
                       </span>
                     </p>
@@ -113,7 +166,7 @@ export default function MyRsvps() {
                     />
                     <span
                       className="text-[10px] font-semibold tracking-wide text-(--c900) uppercase"
-                      style={{ writingMode: 'vertical-rl' }}
+                      style={{ writingMode: "vertical-rl" }}
                     >
                       RSVP confirmed
                     </span>
@@ -123,12 +176,14 @@ export default function MyRsvps() {
                 <div className="flex items-center justify-end gap-2 rounded-b-2xl border border-t-0 border-zinc-200 bg-zinc-50 px-4 py-2.5 sm:px-5">
                   {confirmingId === rsvp.id ? (
                     <>
-                      <span className="mr-auto text-sm text-zinc-600">Cancel this RSVP?</span>
+                      <span className="mr-auto text-sm text-zinc-600">
+                        Cancel this RSVP?
+                      </span>
                       <button
                         type="button"
                         onClick={() => {
-                          cancelRsvp(rsvp.id)
-                          setConfirmingId(null)
+                          cancelRsvp(rsvp.id);
+                          setConfirmingId(null);
                         }}
                         className="min-h-9 rounded-lg bg-red-600 px-3.5 text-sm font-semibold text-white hover:bg-red-700"
                       >
@@ -153,10 +208,10 @@ export default function MyRsvps() {
                   )}
                 </div>
               </li>
-            )
+            );
           })}
         </ul>
       )}
     </main>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext,  useMemo, useState } from 'react'
 import { fetchEvents } from '../api/events'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 
@@ -29,7 +29,6 @@ export function EventsProvider({ children }) {
     }
   }, [])
 
-  useEffect(() => load(), [load])
 
   // The real "going" count: the number in the mock data, plus RSVPs made
   // from this browser. Without a backend this is the honest way to show
