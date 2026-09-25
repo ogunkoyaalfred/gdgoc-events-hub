@@ -22,7 +22,7 @@ export default function Filters({ query, onQuery, category, onCategory, shown, t
           onChange={(e) => onQuery(e.target.value)}
           placeholder="Search events by title"
           autoComplete="off"
-          className="min-h-11 w-full rounded-full border border-zinc-300 bg-white py-2.5 pr-4 pl-11 text-sm focus:border-zinc-900 focus:outline-none"
+          className="min-h-11 w-full rounded-full border border-zinc-300 bg-white py-2.5 pr-4 pl-11 text-base sm:text-sm focus:border-zinc-900 focus:outline-none"
         />
       </div>
 
