@@ -1,11 +1,12 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowLeft, faClock, faFire, faLocationDot, faUsers } from '@fortawesome/free-solid-svg-icons'
+import { faArrowLeft, faCheck, faClock, faFire, faLocationDot, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { useEvents } from '../context/EventsContext'
 import { Covers, FallbackCover } from '../components/Covers'
 import { categoryThemes, fallbackCategoryTheme } from '../utils/categoryTheme'
 import { CardSkeletons, ErrorState } from '../components/States'
+import RsvpForm from '../components/RsvpForm'
 
 const fmt = (options) => new Intl.DateTimeFormat('en-NG', { timeZone: 'Africa/Lagos', ...options })
 const longDate = fmt({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
@@ -13,12 +14,22 @@ const timeFormat = fmt({ hour: 'numeric', minute: '2-digit', hour12: true })
 
 export default function EventDetail() {
   const { id } = useParams()
-  const { events, status, load } = useEvents()
+  const { events, status, load, getGoing, rsvps } = useEvents()
   const headingRef = useRef(null)
+  const [confirmed, setConfirmed] = useState(null)
+  const confirmRef = useRef(null)
 
   useEffect(() => {
     if (status === 'success') headingRef.current?.focus()
   }, [id, status])
+
+  // a different event means a fresh form, not the last one's confirmation
+  useEffect(() => setConfirmed(null), [id])
+
+  // move focus to the confirmation so screen reader users hear it right away
+  useEffect(() => {
+    if (confirmed) confirmRef.current?.focus()
+  }, [confirmed])
 
   if (status === 'loading') {
     return (
@@ -59,9 +70,11 @@ export default function EventDetail() {
   const Cover = Covers[event.category] ?? FallbackCover
   const date = new Date(event.date)
   const isPast = date < new Date()
-  const almostFull = !isPast && event.going >= 90
+  const going = getGoing(event)
+  const almostFull = !isPast && going >= 90
   const tags = (event.tags ?? []).slice(0, 2)
   const learn = event.learn ?? []
+  const mine = rsvps.filter((r) => r.eventId === event.id).length
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-6 sm:py-10">
@@ -117,8 +130,11 @@ export default function EventDetail() {
             </li>
             <li className="flex items-center gap-2">
               <FontAwesomeIcon icon={faUsers} className="w-3.5 flex-none" aria-hidden="true" />
-              {event.going} {isPast ? 'went' : 'going'}
-              {isPast && <span className="font-medium">(this event has ended)</span>}
+              <span key={going} className="inline-block">
+                {going}
+              </span>
+              &nbsp;{isPast ? 'went' : 'going'}
+              {isPast && <span className="font-medium">&nbsp;(this event has ended)</span>}
             </li>
             {almostFull && (
               <li className="flex items-center gap-1.5 font-medium text-(--c900)">
@@ -143,9 +159,9 @@ export default function EventDetail() {
         </div>
       </article>
 
-      <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 text-center sm:p-6">
+      <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6">
         {isPast ? (
-          <>
+          <div className="text-center">
             <h2 className="text-lg font-semibold">This event has ended</h2>
             <p className="mt-1 text-sm text-zinc-600">RSVPs are closed. Take a look at what is coming up next.</p>
             <Link
@@ -154,11 +170,36 @@ export default function EventDetail() {
             >
               See upcoming events
             </Link>
-          </>
+          </div>
+        ) : confirmed ? (
+          <div className="text-center" role="status">
+            <div className="mx-auto mb-3 grid size-12 place-items-center rounded-full bg-emerald-100 text-emerald-700">
+              <FontAwesomeIcon icon={faCheck} className="w-5" />
+            </div>
+            <h2 ref={confirmRef} tabIndex={-1} className="text-lg font-semibold outline-none">
+              You're going, {confirmed.name.split(' ')[0]}
+            </h2>
+            <p className="mt-1 text-sm text-zinc-600">
+              Your seat is saved for {event.title} on {longDate.format(date)} at {timeFormat.format(date)}.
+            </p>
+            <Link
+              to="/my-rsvps"
+              className="mt-4 inline-block min-h-11 rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white"
+            >
+              View my RSVPs
+            </Link>
+          </div>
         ) : (
           <>
-            <h2 className="text-lg font-semibold">RSVP for this event</h2>
-            <p className="mt-1 text-sm text-zinc-600">The RSVP form is coming in the next sprint.</p>
+            {mine > 0 && (
+              <p className="mb-4 rounded-lg bg-zinc-100 px-3 py-2 text-sm text-zinc-700">
+                You already have {mine} {mine === 1 ? 'RSVP' : 'RSVPs'} for this event on this device.{' '}
+                <Link to="/my-rsvps" className="font-medium underline">
+                  See them
+                </Link>
+              </p>
+            )}
+            <RsvpForm event={event} onSuccess={setConfirmed} />
           </>
         )}
       </div>

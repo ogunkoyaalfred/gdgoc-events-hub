@@ -8,6 +8,7 @@ import {
 import { Covers, FallbackCover } from "./Covers";
 import { categoryThemes, fallbackCategoryTheme } from "../utils/categoryTheme";
 import { Link } from "react-router-dom";
+import { useEvents } from "../context/EventsContext";
 
 const fmt = (options) =>
   new Intl.DateTimeFormat("en-NG", { timeZone: "Africa/Lagos", ...options });
@@ -16,12 +17,14 @@ const timeFormat = fmt({ hour: "numeric", minute: "2-digit", hour12: true });
 
 // The whole card always links to its own event page — no prop needed.
 export default function EventCard({ event }) {
+  const { getGoing } = useEvents();
   const t = categoryThemes[event.category] ?? fallbackCategoryTheme;
   const Cover = Covers[event.category] ?? FallbackCover;
 
   const date = new Date(event.date);
   const isPast = date < new Date();
-  const almostFull = !isPast && event.going >= 90;
+  const going = getGoing(event);
+  const almostFull = !isPast && going >= 90;
   const tags = (event.tags ?? []).slice(0, 2);
 
   return (
@@ -90,7 +93,7 @@ export default function EventCard({ event }) {
                 className="w-3.5 flex-none"
                 aria-hidden="true"
               />
-              {event.going} {isPast ? "went" : "going"}
+              {going} {isPast ? "went" : "going"}
               {isPast && <span className="font-medium">(ended)</span>}
             </p>
             {almostFull && (
