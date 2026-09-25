@@ -1,13 +1,3 @@
-@import "tailwindcss";
-
-@theme {
-  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
-}
-
-body {
-  @apply bg-zinc-50 text-zinc-900 antialiased;
-}
-
 /* ---------- Hero: colour cycle + drifting shapes ---------- */
 @keyframes hero-bg-cycle {
   0%   { background-color: #F5C4B3; }
@@ -47,13 +37,4 @@ body {
   }
   .hero-cycle { background-color: #F5C4B3; }
   .hero-cycle-fill { fill: #4A1B0C; }
-}
-
-
-/* faint dot grid on the page background, kept subtle so it never competes
-   with the hero or the poster cards */
-body {
-  background-color: #FAFAFA;
-  background-image: radial-gradient(#E4E4E7 1px, transparent 1px);
-  background-size: 22px 22px;
 }
