@@ -1,28 +1,40 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faClock, faFire, faUsers, faArrowRight } from '@fortawesome/free-solid-svg-icons'
-import { Covers, FallbackCover } from './Covers'
-import { categoryThemes, fallbackCategoryTheme } from '../utils/categoryTheme'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faClock,
+  faFire,
+  faUsers,
+  faArrowRight,
+} from "@fortawesome/free-solid-svg-icons";
+import { Covers, FallbackCover } from "./Covers";
+import { categoryThemes, fallbackCategoryTheme } from "../utils/categoryTheme";
+import { Link } from "react-router-dom";
 
-const fmt = (options) => new Intl.DateTimeFormat('en-NG', { timeZone: 'Africa/Lagos', ...options })
-const chipDate = fmt({ weekday: 'short', day: 'numeric', month: 'short' })
-const timeFormat = fmt({ hour: 'numeric', minute: '2-digit', hour12: true })
+const fmt = (options) =>
+  new Intl.DateTimeFormat("en-NG", { timeZone: "Africa/Lagos", ...options });
+const chipDate = fmt({ weekday: "short", day: "numeric", month: "short" });
+const timeFormat = fmt({ hour: "numeric", minute: "2-digit", hour12: true });
 
-// Pass `href` once the event page exists (Sprint 4). Without it the card is not a link.
-export default function EventCard({ event, href }) {
-  const t = categoryThemes[event.category] ?? fallbackCategoryTheme
-  const Cover = Covers[event.category] ?? FallbackCover
+// The whole card always links to its own event page — no prop needed.
+export default function EventCard({ event }) {
+  const t = categoryThemes[event.category] ?? fallbackCategoryTheme;
+  const Cover = Covers[event.category] ?? FallbackCover;
 
-  const date = new Date(event.date)
-  const isPast = date < new Date()
-  const almostFull = !isPast && event.going >= 90
-  const tags = (event.tags ?? []).slice(0, 2)
+  const date = new Date(event.date);
+  const isPast = date < new Date();
+  const almostFull = !isPast && event.going >= 90;
+  const tags = (event.tags ?? []).slice(0, 2);
 
   return (
     <article
-      style={{ '--c50': t.c50, '--c100': t.c100, '--c800': t.c800, '--c900': t.c900 }}
-      className={`relative flex min-h-110 flex-col overflow-hidden rounded-2xl bg-(--c100) text-(--c800) transition-transform duration-200 has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-(--c900) ${
-        href ? 'motion-safe:hover:-translate-y-1' : ''
-      } ${isPast ? 'opacity-80 saturate-50' : ''}`}
+      style={{
+        "--c50": t.c50,
+        "--c100": t.c100,
+        "--c800": t.c800,
+        "--c900": t.c900,
+      }}
+      className={`relative flex min-h-96 flex-col overflow-hidden rounded-2xl bg-(--c100) text-(--c800) transition-transform duration-200 has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-(--c900) motion-safe:hover:-translate-y-1 ${
+        isPast ? "opacity-80 saturate-50" : ""
+      }`}
     >
       <div className="relative h-32">
         <Cover />
@@ -52,46 +64,55 @@ export default function EventCard({ event, href }) {
 
       <div className="flex flex-1 flex-col gap-2 px-4 pt-3 pb-4">
         <h2 className="text-xl leading-tight font-semibold tracking-tight text-(--c900)">
-          {href ? (
-            <a href={href} className="outline-none after:absolute after:inset-0">
-              {event.title}
-            </a>
-          ) : (
-            event.title
-          )}
+          <Link
+            to={`/events/${event.id}`}
+            className="outline-none after:absolute after:inset-0"
+          >
+            {event.title}
+          </Link>
         </h2>
 
-        <p className="line-clamp-3 text-sm leading-relaxed">{event.description}</p>
+        <p className="line-clamp-3 min-h-18 text-sm leading-relaxed">{event.summary}</p>
 
         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
           <div className="space-y-0.5 text-xs leading-relaxed">
             <p className="flex items-center gap-1.5">
-              <FontAwesomeIcon icon={faClock} className="w-3.5 flex-none" aria-hidden="true" />
+              <FontAwesomeIcon
+                icon={faClock}
+                className="w-3.5 flex-none"
+                aria-hidden="true"
+              />
               {timeFormat.format(date).toUpperCase()}, {event.venue}
             </p>
             <p className="flex items-center gap-1.5">
-              <FontAwesomeIcon icon={faUsers} className="w-3.5 flex-none" aria-hidden="true" />
-              {event.going} {isPast ? 'went' : 'going'}
+              <FontAwesomeIcon
+                icon={faUsers}
+                className="w-3.5 flex-none"
+                aria-hidden="true"
+              />
+              {event.going} {isPast ? "went" : "going"}
               {isPast && <span className="font-medium">(ended)</span>}
             </p>
             {almostFull && (
               <p className="flex items-center gap-1.5 font-medium text-(--c900)">
-                <FontAwesomeIcon icon={faFire} className="w-3.5 flex-none" aria-hidden="true" />
+                <FontAwesomeIcon
+                  icon={faFire}
+                  className="w-3.5 flex-none"
+                  aria-hidden="true"
+                />
                 Filling fast
               </p>
             )}
           </div>
 
-          {href && (
-            <span
-              aria-hidden="true"
-              className="grid size-10 flex-none place-items-center rounded-full bg-(--c900) text-(--c50)"
-            >
-              <FontAwesomeIcon icon={faArrowRight} className="w-4" />
-            </span>
-          )}
+          <span
+            aria-hidden="true"
+            className="grid size-10 flex-none place-items-center rounded-full bg-(--c900) text-(--c50)"
+          >
+            <FontAwesomeIcon icon={faArrowRight} className="w-4" />
+          </span>
         </div>
       </div>
     </article>
-  )
+  );
 }

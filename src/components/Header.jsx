@@ -1,3 +1,5 @@
+import { Link, NavLink } from 'react-router-dom'
+
 // The GDG-style brackets, in the four Google colours.
 function LogoMark() {
   return (
@@ -10,38 +12,31 @@ function LogoMark() {
   )
 }
 
-// `active` names the current page ('events' or 'rsvps') for the pill highlight.
-// Both links are plain <a> for now; swap to React Router's <Link> in Sprint 4.
-export default function Header({ active = 'events' }) {
+const linkClass = ({ isActive }) =>
+  `rounded-full px-3.5 py-2 text-sm font-medium ${
+    isActive ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-600 hover:text-zinc-900'
+  }`
+
+// No `active` prop anymore: NavLink reads the real URL, so this is correct on
+// every page, including the event detail page, with no page telling it what to highlight.
+export default function Header() {
   return (
     <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-        <a href="/" className="flex items-center gap-2 rounded-lg" aria-label="GDGoC Bowen Events Hub, home">
+        <Link to="/" className="flex items-center gap-2 rounded-lg" aria-label="GDGoC Bowen Events Hub, home">
           <LogoMark />
           <span className="text-[15px] font-semibold tracking-tight">
             GDGoC <span className="font-normal text-zinc-500">Bowen</span>
           </span>
-        </a>
+        </Link>
 
-        <nav aria-label="Main" className="flex items-center gap-1 text-sm">
-          <a
-            href="/"
-            aria-current={active === 'events' ? 'page' : undefined}
-            className={`rounded-full px-3.5 py-2 font-medium ${
-              active === 'events' ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-600 hover:text-zinc-900'
-            }`}
-          >
+        <nav aria-label="Main" className="flex items-center gap-1">
+          <NavLink to="/" end className={linkClass}>
             Events
-          </a>
-          <a
-            href="/my-rsvps"
-            aria-current={active === 'rsvps' ? 'page' : undefined}
-            className={`rounded-full px-3.5 py-2 font-medium ${
-              active === 'rsvps' ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-600 hover:text-zinc-900'
-            }`}
-          >
+          </NavLink>
+          <NavLink to="/my-rsvps" className={linkClass}>
             My RSVPs
-          </a>
+          </NavLink>
         </nav>
       </div>
     </header>
