@@ -21,7 +21,7 @@ Built for the GDGoC Bowen Frontend Lead assessment (2026/2027).
 - **My RSVPs page** (`/my-rsvps`), styled as a boarding-pass style ticket, that survives a refresh (saved in `localStorage`), with a two-step cancel.
 - **Upcoming and past events** are treated differently throughout: past events are visually dimmed, show "ended", and RSVPs are closed for them automatically based on the event's own date.
 - **Category colour system**: every category (Web, Mobile, Cloud, AI/ML, Design, Career) has its own colour and cover artwork, used consistently across the card grid, the event page, the filter chips, and the RSVP form.
-- **Accessibility**: labelled form fields with linked error messages and visible focus outlines, live-region announcements for search results and confirmations, and reduced-motion support for the animated hero.
+- **Accessibility**:skip to content link, labelled form fields with linked error messages and visible focus outlines, live-region announcements for search results and confirmations, and reduced-motion support for the animated hero.
 
 ## Run it locally
 
